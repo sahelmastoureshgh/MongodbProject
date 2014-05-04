@@ -1,5 +1,4 @@
 """
-Your task in this exercise has two steps:
 
 - audit the OSMFILE and change the variable 'mapping' to reflect the changes needed to fix 
     the unexpected street types to the appropriate ones in the expected list.
@@ -22,14 +21,16 @@ expected = ["Street", "Avenue", "Boulevard", "Drive", "Court", "Place", "Square"
             "Trail", "Parkway", "Commons"]
 
 # UPDATE THIS VARIABLE
-mapping = { "St": "Street",
-            "St.": "Street",
+# there are three type of street name in my dataset St, St., ST
+mapping = { "St":   "Street",
+            "St.":  "Street",
+            "ST":   "Street",
             "Rd.":  "Road",
-            "N.":"North",
-            "Ave": "Avenue"
+            "N.":   "North",
+            "Ave":  "Avenue"
             }
 
-
+# find the one which are not in expcted name 
 def audit_street_type(street_types, street_name):
     m = street_type_re.search(street_name)
     if m:
@@ -37,11 +38,11 @@ def audit_street_type(street_types, street_name):
         if street_type not in expected:
             street_types[street_type].add(street_name)
 
-
+# find if arrtib k vakue is addr: street
 def is_street_name(elem):
     return (elem.attrib['k'] == "addr:street")
 
-
+# for the addr:street check name of street to be correct
 def audit(osmfile):
     osm_file = open(osmfile, "r")
     street_types = defaultdict(set)
@@ -54,34 +55,31 @@ def audit(osmfile):
 
     return street_types
 
-
+#update name of street which has problems
 def update_name(name, mapping):
 
-    # YOUR CODE HERE
     auditKeys=mapping.keys()
     for key in auditKeys:
-        if name.find(key)>-1:
-            name=name.replace(key,mapping[key])
-            break
-    
-            
+        if name.find(key)>-1: # if problemtic street name is in the name of street
+            name=name.replace(key,mapping[key]) # replace problemtic part with value of map dictionary
+            break       
 
     return name
 
-
+# Creat test case
 def test():
     st_types = audit(OSMFILE)
-    assert len(st_types) == 3
+    assert len(st_types) == 8
     pprint.pprint(dict(st_types))
 
     for st_type, ways in st_types.iteritems():
         for name in ways:
             better_name = update_name(name, mapping)
             print name, "=>", better_name
-            if name == "West Lexington St.":
-                assert better_name == "West Lexington Street"
-            if name == "Baldwin Rd.":
-                assert better_name == "Baldwin Road"
+            if name == "Newton ST":
+                assert better_name == "Newton Street"
+            if name == "Banks St.":
+                assert better_name == "Banks Street"
 
 
 if __name__ == '__main__':
